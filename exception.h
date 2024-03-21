@@ -13,17 +13,18 @@ class exception : public std::runtime_error {
 public:
     exception(sqlite3* db) : errorCode(sqlite3_errcode(db)), std::runtime_error(sqlite3_errmsg(db)) {}
     exception(int code) : errorCode(code), std::runtime_error(sqlite3_errstr(code)) {}
+    exception(const char* msg) : std::runtime_error(msg) {}
 
-    const char* what() const noexcept override {
+    [[nodiscard]] const char* what() const noexcept override {
         return sqlite3_errstr(errorCode);
     }
 
-    int getErrorCode() const {
+    [[nodiscard]] int getErrorCode() const {
         return errorCode;
     }
 
 private:
-    int errorCode;
+    int errorCode=0;
    // std::string errorMsg;
 };
 

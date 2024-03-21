@@ -7,6 +7,17 @@
 #include <memory>
 #include "iterator.h"
 
+
+enum SQLITE_TYPE: int{
+    INTEGER = SQLITE_INTEGER,
+    FLOAT = SQLITE_FLOAT,
+    TEXT= SQLITE_TEXT,
+    BLOB      = SQLITE_BLOB,
+    Null      = SQLITE_NULL
+};
+
+//Если индекс ячейки неорректен - поведение не определено
+//Если stmt неорректен - поведение не определено
 class cell_t {
 public:
     cell_t() = default;
@@ -40,11 +51,13 @@ public:
     }
 
     [[nodiscard]] const char* to_text() const {
-        return reinterpret_cast<const char*>(sqlite3_column_text(stmt_.get(), pos_));
+        auto tmp = reinterpret_cast<const char*>(sqlite3_column_text(stmt_.get(), pos_));
+        return (tmp ? tmp : "");
     }
 
     [[nodiscard]] const wchar_t* to_text16() const {
-        return static_cast<const wchar_t*>(sqlite3_column_text16(stmt_.get(), pos_));
+        auto tmp = static_cast<const wchar_t*>(sqlite3_column_text16(stmt_.get(), pos_));
+        return (tmp ? tmp : L"");
     }
 
     [[nodiscard]] size_t length() const {
@@ -80,22 +93,19 @@ public:
     }
 
     explicit operator std::string() const {
-        return { to_text() };
+        return {reinterpret_cast<const char *>(sqlite3_column_text(stmt_.get(), pos_))};
     }
 
     explicit operator std::wstring() const {
-        return { to_text16() };
-
-        // return { to_text16(), length() };
-        //return { to_text16(), length() -1};
+        return { reinterpret_cast<const wchar_t *>(sqlite3_column_text16(stmt_.get(), pos_))};
     }
 
     explicit operator std::basic_string<uint8_t>() const {
         return { static_cast<const uint8_t*>(to_blob()), length() };
     }
 
-    [[nodiscard]] int type() const {
-        return sqlite3_column_type(stmt_.get(), pos_);
+    [[nodiscard]] SQLITE_TYPE type() const {
+        return static_cast<SQLITE_TYPE>(sqlite3_column_type(stmt_.get(), pos_));
     }
 
     [[nodiscard]] const char* name_assigned() const {
