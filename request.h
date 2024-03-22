@@ -1,29 +1,27 @@
-//
-// Created by kandu on 27.02.2024.
-//
-
 #pragma once
 
 #include <memory>
-#include "sqlite3.h"
+
 #include "row.h"
 #include "exception.h"
-
-class request_t {
+#include "sqlite3.h"
+class statement {
 public:
-    request_t() = default;
+    //using ptr = std::shared_ptr<sqlite3_stmt>;
 
-    request_t(const request_t&) = default;
+    statement() = default;
 
-    request_t& operator=(const request_t&) = default;
+    statement(const statement&) = default;
 
-    request_t(request_t&&) noexcept = default;
+    statement& operator=(const statement&) = default;
 
-    request_t& operator=(request_t&&) noexcept = default;
+    statement(statement&&) noexcept = default;
 
-    ~request_t() = default;
+    statement& operator=(statement&&) noexcept = default;
 
-    request_t(sqlite3_stmt* const stmt) :
+    ~statement() = default;
+
+    explicit statement(sqlite3_stmt* const stmt) :
             stmt_{ stmt, [&](sqlite3_stmt* obj) {sqlite3_finalize(obj); } } {}
 
 
@@ -83,7 +81,7 @@ public:
             throw exception(ret);
     }
 
-    void bind_null(int pos){
+    [[maybe_unused]] void bind_null(int pos){
         int ret = sqlite3_bind_null(stmt_.get(), pos);
         if(ret != SQLITE_OK)
             throw exception(ret);
@@ -110,31 +108,31 @@ public:
                 is_done_ = true;
                 return changes();
             case SQLITE_ROW:
-                throw exception("Use foreach. Statement has sevral rows");
+                throw exception("Use foreach. Statement has several rows");
             default:
                 throw exception(ret);
         }
     }
 
-    int parameter_count(){
+    [[maybe_unused]] int parameter_count(){
         return sqlite3_bind_parameter_count(stmt_.get());
     }
 
-    int parameter_index(const char* name){
+    [[maybe_unused]] int parameter_index(const char* name){
         int ret = sqlite3_bind_parameter_index(stmt_.get(), name);
         if(ret == 0)
             throw exception("Name no exists");
         return ret;
     }
 
-    const char* parameter_name(int index){
+    [[maybe_unused]] const char* parameter_name(int index){
         const char* ret = sqlite3_bind_parameter_name(stmt_.get(), index);
         if(ret == nullptr)
             throw exception("Index out of range");
         return ret;
     }
 
-    void clear_bindings(){
+    [[maybe_unused]] void clear_bindings(){
         sqlite3_clear_bindings(stmt_.get());
     }
 private:

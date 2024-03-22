@@ -2,8 +2,7 @@
 // Created by kandu on 09.03.2024.
 //
 
-#ifndef STEALER_REFACTORED_DB_HPP
-#define STEALER_REFACTORED_DB_HPP
+#pragma once
 
 
 #include "sqlite3.h"
@@ -64,7 +63,7 @@ public:
         sqlite3_close_v2(db);//ALWAYS_OK
     }
 
-    request_t request(const char *sql, int sql_length=-1, const char** tail=nullptr, int flags=0){
+    statement request(const char *sql, int sql_length=-1, const char** tail=nullptr, int flags=0){
         sqlite3_stmt * stmt;
         int ret = sqlite3_prepare_v3(
                 db,            /* Database handle */
@@ -79,7 +78,7 @@ public:
 
     }
 
-    request_t request(const wchar_t *sql, int sql_length=-1, const void ** tail=nullptr, int flags=0){
+    statement request(const wchar_t *sql, int sql_length=-1, const void ** tail=nullptr, int flags=0){
         sqlite3_stmt * stmt;
         int ret = sqlite3_prepare16_v3(
                 db,            /* Database handle */
@@ -138,5 +137,3 @@ private:
     sqlite3* db{};
 };
 
-
-#endif //STEALER_REFACTORED_DB_HPP

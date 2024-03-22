@@ -24,12 +24,12 @@ public:
 
     explicit row_t(const std::shared_ptr<sqlite3_stmt>& stmt) : stmt_{ stmt } {}
 
-    cell_t operator[](int pos) {
-        return cell_t(stmt_, pos);
+    column operator[](int pos) {
+        return column(stmt_, pos);
     }
 
-    cell_t operator[](int pos) const {
-        return cell_t(stmt_, pos);
+    column operator[](int pos) const {
+        return column(stmt_, pos);
     }
 
     [[nodiscard]] cell_it begin() const{
